@@ -1,7 +1,7 @@
 // Test the Attendance Calculator
 #include <iostream>
 #include <print>
-#include "attendanceCalc.h"
+#include "attendanceCalculator.h"
 
 using std::println;
 
@@ -20,8 +20,9 @@ int main()
     else
     {
         Subject VCTT = result.value();
-        println("Current percentage in VCTT:  {}%", VCTT.getCurrentPercentage());
-        println("Percentage required in VCTT: {}%", VCTT.getRequiredPercentage());
-        println("Classes needed in VCTT:      {}",  VCTT.getClassesNeeded());
+        println("Current percentage in VCTT:  {}%", VCTT.currentPercentage());
+        println("Percentage required in VCTT: {}%", VCTT.requiredPercentage());
+        println("Classes needed in VCTT:      {}",  VCTT.classesNeeded());
+        println("Desired percentage in VCTT:  {}%", VCTT.desiredPercentage());
     }
 }

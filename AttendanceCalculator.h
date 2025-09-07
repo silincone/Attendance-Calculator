@@ -23,29 +23,29 @@ namespace AttendanceCalculator
 			return Attendance{ classesAttended, totalNumberOfClasses };
 		}
 
-		float getCurrentPercentage() const
+		float currentPercentage() const
 		{
 			return m_currPercentage;
 		}
 
-		short getClassesAttended() const
+		short classesAttended() const
 		{
 			return m_CA;
 		}
 
-		short getTotalNumberOfClasses() const
+		short totalNumberOfClasses() const
 		{
 			return m_TNOC;
 		}
 
-		void setClassesAttended(short classesAttended)
+		void classesAttended(short value)
 		{
-			m_CA = classesAttended;
+			m_CA = value;
 		}
 
-		void setTotalNumberOfClasses(short totalNumberOfClasses)
+		void totalNumberOfClasses(short value)
 		{
-			m_TNOC = totalNumberOfClasses;
+			m_TNOC = value;
 		}
 
 		bool calculateCurrentPercentage()
@@ -85,9 +85,45 @@ namespace AttendanceCalculator
 			return Subject(std::move(result.value()));
 		}
 
-		std::expected<short, std::string> classesNeeded()
+		float requiredPercentage() const
 		{
-			float currPercentage{ getCurrentPercentage() };
+			return m_requiredPercentage;
+		}
+
+		short classesNeeded() const
+		{
+			return m_classesNeeded;
+		}
+
+		float desiredPercentage() const
+		{
+			return m_desiredPercentage;
+		}
+
+		void desiredPercentage(float value)
+		{
+			m_desiredPercentage = value;
+		}
+
+	private:
+		Subject(Attendance&& attendance) : Attendance(std::move(attendance))
+		{
+			auto result = calculateClassesNeeded();
+
+			if (result.has_value())
+			{
+				m_classesNeeded = result.value();
+				m_requiredPercentage = (DESIRED_PERCENTAGE > currentPercentage()) ? DESIRED_PERCENTAGE - currentPercentage() : 0.0f;
+			}
+			else
+			{
+				println("{}", result.error());
+			}
+		}
+
+		std::expected<short, std::string> calculateClassesNeeded()
+		{
+			float currPercentage{ currentPercentage() };
 
 			if (currPercentage > 100.0) // this won't happen
 			{
@@ -104,40 +140,15 @@ namespace AttendanceCalculator
 				return 0;
 			}
 
-			short classesAttended{ getClassesAttended() };
-			short totalNumberOfClasses{ getTotalNumberOfClasses() };
+			short CA{ classesAttended() };
+			short TNOC{ totalNumberOfClasses() };
 
-			return static_cast<short>(std::ceil((DESIRED_PERCENTAGE / 100.0f * totalNumberOfClasses - classesAttended) / (1.0f - DESIRED_PERCENTAGE / 100.0f)));
-		}
-
-		float getRequiredPercentage() const
-		{
-			return m_requiredPercentage;
-		}
-
-		short getClassesNeeded() const
-		{
-			return m_classesNeeded;
-		}
-
-	private:
-		Subject(Attendance&& attendance) : Attendance(std::move(attendance))
-		{
-			auto result = classesNeeded();
-
-			if (result.has_value())
-			{
-				m_classesNeeded = result.value();
-				m_requiredPercentage = (DESIRED_PERCENTAGE > getCurrentPercentage()) ? DESIRED_PERCENTAGE - getCurrentPercentage() : 0.0f;
-			}
-			else
-			{
-				println("{}", result.error());
-			}
+			return static_cast<short>(std::ceil((DESIRED_PERCENTAGE / 100.0f * TNOC - CA) / (1.0f - DESIRED_PERCENTAGE / 100.0f)));
 		}
 
 	private:
 		unsigned short m_classesNeeded;
 		float m_requiredPercentage;
+		float m_desiredPercentage{ AttendanceCalculator::DESIRED_PERCENTAGE };
 	};
 }
