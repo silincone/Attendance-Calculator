@@ -13,14 +13,14 @@ namespace AttendanceCalculator
 	public:
 		Attendance() = delete;
 		
-		static std::expected<Attendance, std::string> create(unsigned short classesAttended, unsigned short totalNumberOfClasses)
+		static std::expected<Attendance, std::string> create(unsigned short classesAttended, unsigned short classesConducted)
 		{
-			if (classesAttended > totalNumberOfClasses)
+			if (classesAttended > classesConducted)
 			{
-				return std::unexpected(std::format("ERROR! Number of classes attended ({}) is more than the total number of classes ({}).", classesAttended, totalNumberOfClasses));
+				return std::unexpected(std::format("ERROR! Number of classes attended ({}) is more than the classes conducted ({}).", classesAttended, classesConducted));
 			}
 
-			return Attendance{ classesAttended, totalNumberOfClasses };
+			return Attendance{ classesAttended, classesConducted };
 		}
 
 		float currentPercentage() const
@@ -33,9 +33,9 @@ namespace AttendanceCalculator
 			return m_CA;
 		}
 
-		short totalNumberOfClasses() const
+		short classesConducted() const
 		{
-			return m_TNOC;
+			return m_CC;
 		}
 
 		void classesAttended(short value)
@@ -44,29 +44,29 @@ namespace AttendanceCalculator
 			calculateCurrentPercentage();
 		}
 
-		void totalNumberOfClasses(short value)
+		void classesConducted(short value)
 		{
-			m_TNOC = value;
+			m_CC = value;
 			calculateCurrentPercentage();
 		}
 
 		bool calculateCurrentPercentage()
 		{
-			if (m_TNOC == 0) { return false; }
+			if (m_CC == 0) { return false; }
 
-			m_currPercentage = static_cast<float>(m_CA) / m_TNOC * 100.0f;
+			m_currPercentage = static_cast<float>(m_CA) / m_CC * 100.0f;
 
 			return true;
 		}
 
 	private:
-		Attendance(unsigned short classesAttended, unsigned short totalNumberOfClasses) : m_CA{ classesAttended }, m_TNOC{ totalNumberOfClasses }
+		Attendance(unsigned short classesAttended, unsigned short classesConducted) : m_CA{ classesAttended }, m_CC{ classesConducted }
 		{
 			calculateCurrentPercentage();
 		}
 
 	private:
-		unsigned short m_CA, m_TNOC;
+		unsigned short m_CA, m_CC;
 		float m_currPercentage;
 	};
 
@@ -75,16 +75,16 @@ namespace AttendanceCalculator
 	public:
 		Subject() = delete;
 		
-		static std::expected<Subject, std::string> create(unsigned short classesAttended, unsigned short totalNumberOfClasses)
+		static std::expected<Subject, std::string> create(std::string subjectName, unsigned short classesAttended, unsigned short classesConducted)
 		{
-			auto result = Attendance::create(classesAttended, totalNumberOfClasses);
+			auto result = Attendance::create(classesAttended, classesConducted);
 
 			if (!result.has_value())
 			{
 				return std::unexpected(result.error());
 			}
 			
-			return Subject(std::move(result.value()));
+			return Subject(subjectName, std::move(result.value()));
 		}
 
 		float requiredPercentage() const
@@ -107,6 +107,22 @@ namespace AttendanceCalculator
 			m_desiredPercentage = value;
 			calculateCurrentPercentage();
 			calculateRequiredPercentage();
+
+			auto result = calculateClassesNeeded();
+			if (result.has_value())
+			{
+				m_classesNeeded = result.value();
+			}
+		}
+
+		void subjectName(std::string value)
+		{
+			m_subjectName = value;
+		}
+
+		std::string subjectName() const
+		{
+			return m_subjectName;
 		}
 
 		void calculateRequiredPercentage()
@@ -115,7 +131,7 @@ namespace AttendanceCalculator
 		}
 
 	private:
-		Subject(Attendance&& attendance) : Attendance(std::move(attendance))
+		Subject(std::string subjectName, Attendance&& attendance) : m_subjectName{ subjectName }, Attendance(std::move(attendance))
 		{
 			auto result = calculateClassesNeeded();
 
@@ -150,7 +166,7 @@ namespace AttendanceCalculator
 			}
 
 			short CA{ classesAttended() };
-			short TNOC{ totalNumberOfClasses() };
+			short TNOC{ classesConducted() };
 
 			return static_cast<short>(std::ceil((m_desiredPercentage / 100.0f * TNOC - CA) / (1.0f - m_desiredPercentage / 100.0f)));
 		}
@@ -159,5 +175,6 @@ namespace AttendanceCalculator
 		unsigned short m_classesNeeded;
 		float m_requiredPercentage;
 		float m_desiredPercentage{ AttendanceCalculator::DESIRED_PERCENTAGE };
+		std::string m_subjectName;
 	};
 }
