@@ -41,11 +41,13 @@ namespace AttendanceCalculator
 		void classesAttended(short value)
 		{
 			m_CA = value;
+			calculateCurrentPercentage();
 		}
 
 		void totalNumberOfClasses(short value)
 		{
 			m_TNOC = value;
+			calculateCurrentPercentage();
 		}
 
 		bool calculateCurrentPercentage()
@@ -103,6 +105,13 @@ namespace AttendanceCalculator
 		void desiredPercentage(float value)
 		{
 			m_desiredPercentage = value;
+			calculateCurrentPercentage();
+			calculateRequiredPercentage();
+		}
+
+		void calculateRequiredPercentage()
+		{
+			m_requiredPercentage = (DESIRED_PERCENTAGE > currentPercentage()) ? DESIRED_PERCENTAGE - currentPercentage() : 0.0f;
 		}
 
 	private:
@@ -113,7 +122,7 @@ namespace AttendanceCalculator
 			if (result.has_value())
 			{
 				m_classesNeeded = result.value();
-				m_requiredPercentage = (DESIRED_PERCENTAGE > currentPercentage()) ? DESIRED_PERCENTAGE - currentPercentage() : 0.0f;
+				calculateRequiredPercentage();
 			}
 			else
 			{
@@ -143,7 +152,7 @@ namespace AttendanceCalculator
 			short CA{ classesAttended() };
 			short TNOC{ totalNumberOfClasses() };
 
-			return static_cast<short>(std::ceil((DESIRED_PERCENTAGE / 100.0f * TNOC - CA) / (1.0f - DESIRED_PERCENTAGE / 100.0f)));
+			return static_cast<short>(std::ceil((m_desiredPercentage / 100.0f * TNOC - CA) / (1.0f - m_desiredPercentage / 100.0f)));
 		}
 
 	private:
