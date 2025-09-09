@@ -160,7 +160,7 @@ namespace AttendanceCalculator
 				return std::unexpected(std::format("ERROR! Percentage ({}) is less than 0.", currPercentage));
 			}
 
-			if (currPercentage >= DESIRED_PERCENTAGE) // this might happen
+			if (currPercentage >= m_desiredPercentage) // this might happen
 			{
 				return 0;
 			}
