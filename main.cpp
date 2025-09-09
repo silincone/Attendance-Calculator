@@ -27,16 +27,16 @@ int main()
         return 1;
     }
 
-    auto result = Subject::create("VCTT", numberOfClassAttended, numberOfClassConducted);
+    auto result = Subject::create(subjectName, numberOfClassAttended, numberOfClassConducted);
 
     if (result.has_value())
     {
-        Subject VCTT = result.value();
+        Subject subject = result.value();
         print("\n");
-        println("Current percentage in VCTT:  {}%", VCTT.currentPercentage());
-        println("Percentage required in VCTT: {}%", VCTT.requiredPercentage());
-        println("Desired percentage in VCTT:  {}%", VCTT.desiredPercentage());
-        println("Classes needed in VCTT:      {}",  VCTT.classesNeeded());
+        println("Current percentage in {}:  {}%", subjectName, subject.currentPercentage());
+        println("Percentage required in {}: {}%", subjectName, subject.requiredPercentage());
+        println("Desired percentage in {}:  {}%", subjectName, subject.desiredPercentage());
+        println("Classes needed in {}:      {}",  subjectName, subject.classesNeeded());
     }
     else
     {
