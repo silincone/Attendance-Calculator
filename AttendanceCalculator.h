@@ -28,31 +28,39 @@ namespace AttendanceCalculator
 			return m_currPercentage;
 		}
 
-		short classesAttended() const
+		unsigned short classesAttended() const
 		{
 			return m_CA;
 		}
 
-		short classesConducted() const
+		unsigned short classesConducted() const
 		{
 			return m_CC;
 		}
 
-		void classesAttended(short value)
+		bool classesAttended(unsigned short value)
 		{
+			if (!isOk(value, m_CC)) { return false; }
+
 			m_CA = value;
 			calculateCurrentPercentage();
+
+			return true;
 		}
 
-		void classesConducted(short value)
+		bool classesConducted(unsigned short value)
 		{
+			if (!isOk(m_CA, value)) { return false; }
+
 			m_CC = value;
 			calculateCurrentPercentage();
+
+			return true;
 		}
 
 		bool calculateCurrentPercentage()
 		{
-			if (m_CC == 0) { return false; }
+			if (!isOk(m_CA, m_CC)) { return false; }
 
 			m_currPercentage = static_cast<float>(m_CA) / m_CC * 100.0f;
 
@@ -63,6 +71,16 @@ namespace AttendanceCalculator
 		Attendance(unsigned short classesAttended, unsigned short classesConducted) : m_CA{ classesAttended }, m_CC{ classesConducted }
 		{
 			calculateCurrentPercentage();
+		}
+
+		bool isOk(unsigned short& classesAttended, unsigned short& classesConducted) const
+		{
+			if (classesAttended > classesConducted) 
+			{ 
+				std::println("ERROR! Number of classes attended ({}) is more than the classes conducted ({}).", classesAttended, classesConducted);
+				return false; 
+			}
+			return true;
 		}
 
 	private:
@@ -102,7 +120,7 @@ namespace AttendanceCalculator
 			return m_desiredPercentage;
 		}
 
-		void desiredPercentage(float value)
+		bool desiredPercentage(float value)
 		{
 			m_desiredPercentage = value;
 			calculateCurrentPercentage();
@@ -113,6 +131,13 @@ namespace AttendanceCalculator
 			{
 				m_classesNeeded = result.value();
 			}
+			else
+			{
+				std::println("{}", result.error());
+				return false;
+			}
+
+			return true;
 		}
 
 		void subjectName(std::string value)
@@ -127,7 +152,7 @@ namespace AttendanceCalculator
 
 		void calculateRequiredPercentage()
 		{
-			m_requiredPercentage = (DESIRED_PERCENTAGE > currentPercentage()) ? DESIRED_PERCENTAGE - currentPercentage() : 0.0f;
+			m_requiredPercentage = (m_desiredPercentage > currentPercentage()) ? m_desiredPercentage - currentPercentage() : 0.0f;
 		}
 
 	private:
