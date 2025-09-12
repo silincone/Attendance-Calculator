@@ -34,8 +34,8 @@ int main()
         Subject subject = result.value();
         print("\n");
         println("Current percentage in {}:  {}%", subjectName, subject.currentPercentage());
-        println("Percentage required in {}: {}%", subjectName, subject.requiredPercentage());
         println("Desired percentage in {}:  {}%", subjectName, subject.desiredPercentage());
+        println("Percentage required in {}: {}%", subjectName, subject.requiredPercentage());
         println("Classes needed in {}:      {}",  subjectName, subject.classesNeeded());
     }
     else
