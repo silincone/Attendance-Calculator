@@ -190,8 +190,8 @@ namespace AttendanceCalculator
 				return 0;
 			}
 
-			short CA{ classesAttended() };
-			short TNOC{ classesConducted() };
+			unsigned short CA{ classesAttended() };
+			unsigned short TNOC{ classesConducted() };
 
 			return static_cast<short>(std::ceil((m_desiredPercentage / 100.0f * TNOC - CA) / (1.0f - m_desiredPercentage / 100.0f)));
 		}
