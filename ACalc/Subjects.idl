@@ -1,0 +1,14 @@
+namespace ACalc
+{
+    [bindable]
+    [default_interface]
+    runtimeclass Subjects 
+    {
+        Subjects();
+        Subjects(String subjectName, UInt8 classesAttended, UInt8 classesConducted);
+
+        String SubjectName{ get; set; };
+        UInt8 ClassesAttended{ get; set; };
+        UInt8 ClassesConducted{ get; set; };
+    }
+}

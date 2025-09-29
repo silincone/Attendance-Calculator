@@ -4,7 +4,7 @@
 #include <format>
 #include <print>
 
-namespace AttendanceCalculator
+namespace ACalcCore
 {
 	constexpr float DESIRED_PERCENTAGE = 85.0f;
 
@@ -13,7 +13,7 @@ namespace AttendanceCalculator
 	public:
 		Attendance() = delete;
 		
-		static std::expected<Attendance, std::string> create(unsigned short classesAttended, unsigned short classesConducted)
+		static std::expected<Attendance, std::string> create(std::uint8_t classesAttended, std::uint8_t classesConducted)
 		{
 			if (classesAttended > classesConducted)
 			{
@@ -28,17 +28,17 @@ namespace AttendanceCalculator
 			return m_currPercentage;
 		}
 
-		unsigned short classesAttended() const
+		std::uint8_t classesAttended() const
 		{
 			return m_CA;
 		}
 
-		unsigned short classesConducted() const
+		std::uint8_t classesConducted() const
 		{
 			return m_CC;
 		}
 
-		bool classesAttended(unsigned short value)
+		bool classesAttended(std::uint8_t value)
 		{
 			if (!isOk(value, m_CC)) { return false; }
 
@@ -48,7 +48,7 @@ namespace AttendanceCalculator
 			return true;
 		}
 
-		bool classesConducted(unsigned short value)
+		bool classesConducted(std::uint8_t value)
 		{
 			if (!isOk(m_CA, value)) { return false; }
 
@@ -68,12 +68,12 @@ namespace AttendanceCalculator
 		}
 
 	private:
-		Attendance(unsigned short classesAttended, unsigned short classesConducted) : m_CA{ classesAttended }, m_CC{ classesConducted }
+		Attendance(std::uint8_t classesAttended, std::uint8_t classesConducted) : m_CA{ classesAttended }, m_CC{ classesConducted }
 		{
 			calculateCurrentPercentage();
 		}
 
-		bool isOk(unsigned short& classesAttended, unsigned short& classesConducted) const
+		bool isOk(std::uint8_t& classesAttended, std::uint8_t& classesConducted) const
 		{
 			if (classesAttended > classesConducted) 
 			{ 
@@ -84,7 +84,7 @@ namespace AttendanceCalculator
 		}
 
 	private:
-		unsigned short m_CA, m_CC;
+		std::uint8_t m_CA, m_CC;
 		float m_currPercentage;
 	};
 
@@ -93,7 +93,7 @@ namespace AttendanceCalculator
 	public:
 		Subject() = delete;
 		
-		static std::expected<Subject, std::string> create(std::string subjectName, unsigned short classesAttended, unsigned short classesConducted)
+		static std::expected<Subject, std::string> create(std::string subjectName, std::uint8_t classesAttended, std::uint8_t classesConducted)
 		{
 			auto result = Attendance::create(classesAttended, classesConducted);
 
@@ -110,7 +110,7 @@ namespace AttendanceCalculator
 			return m_requiredPercentage;
 		}
 
-		short classesNeeded() const
+		std::uint8_t classesNeeded() const
 		{
 			return m_classesNeeded;
 		}
@@ -171,7 +171,7 @@ namespace AttendanceCalculator
 			}
 		}
 
-		std::expected<short, std::string> calculateClassesNeeded()
+		std::expected<std::uint8_t, std::string> calculateClassesNeeded()
 		{
 			float currPercentage{ currentPercentage() };
 
@@ -190,16 +190,16 @@ namespace AttendanceCalculator
 				return 0;
 			}
 
-			unsigned short CA{ classesAttended() };
-			unsigned short TNOC{ classesConducted() };
+			std::uint8_t CA{ classesAttended() };
+			std::uint8_t TNOC{ classesConducted() };
 
-			return static_cast<short>(std::ceil((m_desiredPercentage / 100.0f * TNOC - CA) / (1.0f - m_desiredPercentage / 100.0f)));
+			return static_cast<std::uint8_t>(std::ceil((m_desiredPercentage / 100.0f * TNOC - CA) / (1.0f - m_desiredPercentage / 100.0f)));
 		}
 
 	private:
-		unsigned short m_classesNeeded;
+		std::uint8_t m_classesNeeded;
 		float m_requiredPercentage;
-		float m_desiredPercentage{ AttendanceCalculator::DESIRED_PERCENTAGE };
+		float m_desiredPercentage{ ACalcCore::DESIRED_PERCENTAGE };
 		std::string m_subjectName;
 	};
 }

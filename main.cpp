@@ -2,16 +2,16 @@
 #include <iostream>
 #include <print>
 #include <string>
-#include "attendanceCalculator.h"
+#include "ACalcCore.h"
 
 using std::println, std::print;
 
-using namespace AttendanceCalculator;
+using namespace ACalcCore;
 
 int main()
 {
     std::string subjectName;
-    short numberOfClassConducted, numberOfClassAttended;
+    std::uint8_t numberOfClassConducted, numberOfClassAttended;
 
     println("Attendance Calculator\n");
 
