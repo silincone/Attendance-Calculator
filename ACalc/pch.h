@@ -28,4 +28,7 @@
 #include <wil/cppwinrt_helpers.h>
 
 #include <winrt/Microsoft.UI.Windowing.h> // for Resize()
+#include <winrt/Windows.UI.h> // for Color
 #include <limits> // for std::numeric_limits
+#include <expected> // for std::expected
+#include <memory> // for std::unique_ptr

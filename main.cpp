@@ -11,7 +11,7 @@ using namespace ACalcCore;
 int main()
 {
     std::string subjectName;
-    std::uint8_t numberOfClassConducted, numberOfClassAttended;
+    std::uint16_t numberOfClassConducted, numberOfClassAttended;
 
     println("Attendance Calculator\n");
 
@@ -19,6 +19,7 @@ int main()
     std::cin >> subjectName;
 
     print("Enter the number of Classes Conducted: "), std::cin >> numberOfClassConducted;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     print("Enter the number of Classes Attended: "), std::cin >> numberOfClassAttended;
 
     if (numberOfClassAttended > numberOfClassConducted)
@@ -35,8 +36,10 @@ int main()
         print("\n");
         println("Current percentage in {}:  {}%", subjectName, subject.currentPercentage());
         println("Desired percentage in {}:  {}%", subjectName, subject.desiredPercentage());
-        println("Percentage required in {}: {}%", subjectName, subject.requiredPercentage());
-        println("Classes needed in {}:      {}",  subjectName, subject.classesNeeded());
+        println("Required percentage in {}: {}%", subjectName, subject.requiredPercentage());
+        println("Excess percentage in {}:   {}%", subjectName, subject.excessPercentage());
+        println("Classes needed in {}:      {}", subjectName, subject.classesNeeded());
+        println("Class overflow in {}:      {}", subjectName, subject.classOverflow());
     }
     else
     {

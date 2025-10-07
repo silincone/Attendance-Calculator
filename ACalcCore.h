@@ -3,6 +3,7 @@
 #include <string>
 #include <format>
 #include <print>
+#include <cmath> // for std::ceil, std::floor
 
 namespace ACalcCore
 {
@@ -12,8 +13,8 @@ namespace ACalcCore
 	{
 	public:
 		Attendance() = delete;
-		
-		static std::expected<Attendance, std::string> create(std::uint8_t classesAttended, std::uint8_t classesConducted)
+
+		static std::expected<Attendance, std::string> create(std::uint16_t classesAttended, std::uint16_t classesConducted)
 		{
 			if (classesAttended > classesConducted)
 			{
@@ -28,17 +29,17 @@ namespace ACalcCore
 			return m_currPercentage;
 		}
 
-		std::uint8_t classesAttended() const
+		std::uint16_t classesAttended() const
 		{
 			return m_CA;
 		}
 
-		std::uint8_t classesConducted() const
+		std::uint16_t classesConducted() const
 		{
 			return m_CC;
 		}
 
-		bool classesAttended(std::uint8_t value)
+		bool classesAttended(std::uint16_t value)
 		{
 			if (!isOk(value, m_CC)) { return false; }
 
@@ -48,7 +49,7 @@ namespace ACalcCore
 			return true;
 		}
 
-		bool classesConducted(std::uint8_t value)
+		bool classesConducted(std::uint16_t value)
 		{
 			if (!isOk(m_CA, value)) { return false; }
 
@@ -68,23 +69,23 @@ namespace ACalcCore
 		}
 
 	private:
-		Attendance(std::uint8_t classesAttended, std::uint8_t classesConducted) : m_CA{ classesAttended }, m_CC{ classesConducted }
+		Attendance(std::uint16_t classesAttended, std::uint16_t classesConducted) : m_CA{ classesAttended }, m_CC{ classesConducted }
 		{
 			calculateCurrentPercentage();
 		}
 
-		bool isOk(std::uint8_t& classesAttended, std::uint8_t& classesConducted) const
+		bool isOk(std::uint16_t& classesAttended, std::uint16_t& classesConducted) const
 		{
-			if (classesAttended > classesConducted) 
-			{ 
+			if (classesAttended > classesConducted)
+			{
 				std::println("ERROR! Number of classes attended ({}) is more than the classes conducted ({}).", classesAttended, classesConducted);
-				return false; 
+				return false;
 			}
 			return true;
 		}
 
 	private:
-		std::uint8_t m_CA, m_CC;
+		std::uint16_t m_CA, m_CC;
 		float m_currPercentage;
 	};
 
@@ -92,8 +93,8 @@ namespace ACalcCore
 	{
 	public:
 		Subject() = delete;
-		
-		static std::expected<Subject, std::string> create(std::string subjectName, std::uint8_t classesAttended, std::uint8_t classesConducted)
+
+		static std::expected<Subject, std::string> create(std::string subjectName, std::uint16_t classesAttended, std::uint16_t classesConducted)
 		{
 			auto result = Attendance::create(classesAttended, classesConducted);
 
@@ -101,18 +102,29 @@ namespace ACalcCore
 			{
 				return std::unexpected(result.error());
 			}
-			
+
 			return Subject(subjectName, std::move(result.value()));
 		}
 
+	public:
 		float requiredPercentage() const
 		{
 			return m_requiredPercentage;
 		}
 
-		std::uint8_t classesNeeded() const
+		float excessPercentage() const
+		{
+			return m_excessPercentage;
+		}
+
+		std::uint16_t classesNeeded() const
 		{
 			return m_classesNeeded;
+		}
+
+		std::uint16_t classOverflow() const
+		{
+			return m_classOverflow;
 		}
 
 		float desiredPercentage() const
@@ -122,20 +134,16 @@ namespace ACalcCore
 
 		bool desiredPercentage(float value)
 		{
+			if (value > 100.0f or value < 0.0f) { return false; }
+
 			m_desiredPercentage = value;
+			
 			calculateCurrentPercentage();
 			calculateRequiredPercentage();
+			calculateExcessPercentage();
 
-			auto result = calculateClassesNeeded();
-			if (result.has_value())
-			{
-				m_classesNeeded = result.value();
-			}
-			else
-			{
-				std::println("{}", result.error());
-				return false;
-			}
+			m_classesNeeded = calculateClassesNeeded();
+			m_classOverflow = calculateClasseOverflow();
 
 			return true;
 		}
@@ -150,55 +158,58 @@ namespace ACalcCore
 			return m_subjectName;
 		}
 
+	private:
+		Subject(std::string subjectName, Attendance&& attendance) : m_subjectName{ subjectName }, Attendance(std::move(attendance))
+		{
+			m_classesNeeded = calculateClassesNeeded();
+			m_classOverflow = calculateClasseOverflow();
+			calculateRequiredPercentage();
+			calculateExcessPercentage();
+		}
+
 		void calculateRequiredPercentage()
 		{
 			m_requiredPercentage = (m_desiredPercentage > currentPercentage()) ? m_desiredPercentage - currentPercentage() : 0.0f;
 		}
 
-	private:
-		Subject(std::string subjectName, Attendance&& attendance) : m_subjectName{ subjectName }, Attendance(std::move(attendance))
+		void calculateExcessPercentage()
 		{
-			auto result = calculateClassesNeeded();
-
-			if (result.has_value())
-			{
-				m_classesNeeded = result.value();
-				calculateRequiredPercentage();
-			}
-			else
-			{
-				println("{}", result.error());
-			}
+			m_excessPercentage = (currentPercentage() > m_desiredPercentage) ? currentPercentage() - m_desiredPercentage : 0.0f;
 		}
 
-		std::expected<std::uint8_t, std::string> calculateClassesNeeded()
+		std::uint16_t calculateClassesNeeded()
 		{
 			float currPercentage{ currentPercentage() };
 
-			if (currPercentage > 100.0) // this won't happen
-			{
-				return std::unexpected(std::format("ERROR! Percentage ({}) is more than 100.", currPercentage));
-			}
-
-			if (currPercentage < 0.0) // this also won't happen
-			{
-				return std::unexpected(std::format("ERROR! Percentage ({}) is less than 0.", currPercentage));
-			}
-
-			if (currPercentage >= m_desiredPercentage) // this might happen
+			if (currPercentage >= m_desiredPercentage)
 			{
 				return 0;
 			}
 
-			std::uint8_t CA{ classesAttended() };
-			std::uint8_t TNOC{ classesConducted() };
+			std::uint16_t CA{ classesAttended() };
+			std::uint16_t TNOC{ classesConducted() };
 
-			return static_cast<std::uint8_t>(std::ceil((m_desiredPercentage / 100.0f * TNOC - CA) / (1.0f - m_desiredPercentage / 100.0f)));
+			return static_cast<std::uint16_t>(std::ceil((m_desiredPercentage / 100.0f * TNOC - CA) / (1.0f - m_desiredPercentage / 100.0f)));
+		}
+
+		std::uint16_t calculateClasseOverflow()
+		{
+			float currPercentage{ currentPercentage() };
+
+			if (currPercentage <= m_desiredPercentage)
+			{
+				return 0;
+			}
+
+			std::uint16_t CA{ classesAttended() };
+			std::uint16_t TNOC{ classesConducted() };
+
+			return static_cast<std::uint16_t>(std::floor((CA - m_desiredPercentage / 100.0f * TNOC) / (1.0f - m_desiredPercentage / 100.0f)));
 		}
 
 	private:
-		std::uint8_t m_classesNeeded;
-		float m_requiredPercentage;
+		std::uint16_t m_classesNeeded, m_classOverflow;
+		float m_requiredPercentage, m_excessPercentage;
 		float m_desiredPercentage{ ACalcCore::DESIRED_PERCENTAGE };
 		std::string m_subjectName;
 	};

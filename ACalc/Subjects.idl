@@ -8,7 +8,12 @@ namespace ACalc
         Subjects(String subjectName, UInt8 classesAttended, UInt8 classesConducted);
 
         String SubjectName{ get; set; };
-        UInt8 ClassesAttended{ get; set; };
-        UInt8 ClassesConducted{ get; set; };
+        UInt16 ClassesAttended{ get; set; };
+        UInt16 ClassesConducted{ get; set; };
+        Single DesiredPercentage{ get; set; };
+
+        Single CurrentPercentage{ get; };
+        Single RequiredPercentage{ get; };
+        UInt16 ClassesNeeded{ get; };
     }
 }

@@ -16,23 +16,48 @@ namespace winrt::ACalc::implementation
         return m_subjectName;
     }
 
-    void Subjects::ClassesAttended(std::uint8_t classesAttended)
+    void Subjects::ClassesAttended(std::uint16_t classesAttended)
     {
-        m_CA = classesAttended;
+        m_classesAttended = classesAttended;
     }
 
-    std::uint8_t Subjects::ClassesAttended()
+    std::uint16_t Subjects::ClassesAttended() const
     {
-        return m_CA;
+        return m_classesAttended;
     }
 
-    void Subjects::ClassesConducted(std::uint8_t classesConducted)
+    void Subjects::ClassesConducted(std::uint16_t classesConducted)
     {
-        m_CC = classesConducted;
+        m_classesConducted = classesConducted;
     }
 
-    std::uint8_t Subjects::ClassesConducted()
+    std::uint16_t Subjects::ClassesConducted() const
     {
-        return m_CC;
+        return m_classesConducted;
+    }
+
+    void Subjects::DesiredPercentage(float desiredPercentage)
+    {
+        m_sub->desiredPercentage(desiredPercentage);
+    }
+
+    float Subjects::DesiredPercentage() const
+    {
+        return m_sub->desiredPercentage();
+    }
+
+    std::uint16_t Subjects::ClassesNeeded() const
+    {
+        return m_sub->classesNeeded();
+    }
+
+    float Subjects::CurrentPercentage() const
+    {
+        return m_sub->currentPercentage();
+    }
+
+    float Subjects::RequiredPercentage() const
+    {
+        return m_sub->requiredPercentage();
     }
 }
