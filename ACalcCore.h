@@ -4,6 +4,7 @@
 #include <format>
 #include <print>
 #include <cmath> // for std::ceil, std::floor
+#include <cstdint> // for std::uint16_t
 
 namespace ACalcCore
 {
