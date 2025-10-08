@@ -205,7 +205,7 @@ namespace ACalcCore
 			std::uint16_t CA{ classesAttended() };
 			std::uint16_t TNOC{ classesConducted() };
 
-			return static_cast<std::uint16_t>(std::floor((CA - m_desiredPercentage / 100.0f * TNOC) / (1.0f - m_desiredPercentage / 100.0f)));
+			return static_cast<std::uint16_t>(std::floor(CA / (m_desiredPercentage / 100.0f) - TNOC));
 		}
 
 	private:
